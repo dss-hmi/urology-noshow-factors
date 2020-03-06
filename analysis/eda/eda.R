@@ -45,10 +45,12 @@ ds <- readRDS("./data-unshared/derived/0-greeted.rds")
 # ---- inspect-data -------------------------------------------------------------
 # ds %>% glimpse()
 # ---- tweak-data --------------------------------------------------------------
+ds <- ds %>%
+  dplyr::filter(!is.na(reason_for_visit))
 
 # ---- basic-table --------------------------------------------------------------
 
-# ---- basic-graph --------------------------------------------------------------
+# ---- univariate --------------------------------------------------------------
 varnames <- setdiff(names(ds),"patient_id")
 
 item_n <- varnames[1]
@@ -63,25 +65,37 @@ for(item_i in varnames){
   cat("\n")
 }
 
-# Sonata form report structure
-# ---- dev-a-0 ---------------------------------
-# ---- dev-a-1 ---------------------------------
-# ---- dev-a-2 ---------------------------------
-# ---- dev-a-3 ---------------------------------
-# ---- dev-a-4 ---------------------------------
-# ---- dev-a-5 ---------------------------------
+# ---- bivariate --------------
+varnames_bivariate <- setdiff(varnames,"returned_to_care")
 
-# ---- dev-b-0 ---------------------------------
-# ---- dev-b-1 ---------------------------------
-# ---- dev-b-2 ---------------------------------
-# ---- dev-b-3 ---------------------------------
-# ---- dev-b-4 ---------------------------------
-# ---- dev-b-5 ---------------------------------
+ds %>% TabularManifest::histogram_discrete(
+  variable_name = "returned_to_care",
+  main_title = varnames_varlabels["returned_to_care"]
+) %>% print()
+cat("\n")
 
-# ---- recap-0 ---------------------------------
-# ---- recap-1 ---------------------------------
-# ---- recap-2 ---------------------------------
-# ---- recap-3 ---------------------------------
+for(item_i in varnames_bivariate){
+  cat("\n## ", item_i,"\n" )
+
+  g <- ds %>%
+    ggplot(aes_string(x = item_i, fill = "returned_to_care")) +
+    geom_bar(position = "fill")+
+    coord_flip()+
+    labs(
+      fill = varnames_varlabels["returned_to_care"]
+      ,y = "Percent"
+      , x = varnames_varlabels[item_i]
+    )+
+    guides(
+      fill = guide_legend(reverse = TRUE)
+    )+
+    theme_bw()+
+    theme(legend.position = "top")
+  g %>% print()
+  cat("\n")
+}
+
+
 
 
 # ---- publish ---------------------------------------

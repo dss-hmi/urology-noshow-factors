@@ -80,10 +80,15 @@ read_chunk("./analysis/eda/eda.R")
 
 # Univariate 
 <!-- Basic graph view.   -->
-```{r basic-graph, echo=FALSE, results='asis', message=FALSE, warning=F}
+```{r univariate, echo=FALSE, results='asis', message=FALSE, warning=F}
 ```
 
+# Bivariate 
+This section shows the proportion of patients have "Returned to Care", broken down for each variables by its levels. 
 
+<!-- Basic graph view.   -->
+```{r bivariate, echo=FALSE, results='asis', message=FALSE, warning=F}
+```
 
 
 
