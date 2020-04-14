@@ -64,12 +64,12 @@ ds %>% glimpse(50)
 
 # Match factor levels to the labels
 lvl_reason_for_visit <- c(
-  "1"  = "renal/ureter"
-  ,"2" = "testies/scrotum"
-  ,"3" = "penile"
-  ,"4" = "voiding"
-  ,"5" = "bladder"
-  ,"6" = "female gyn"
+  "1"  = "Renal/Ureter"
+  ,"2" = "Testies/Scrotum"
+  ,"3" = "Penile"
+  ,"4" = "Voiding"
+  ,"5" = "Bladder"
+  ,"6" = "Female gyn"
 )
 lvl_provider <- c(
   "0"  = "MD"
