@@ -92,7 +92,35 @@ for(item_i in varnames_bivariate){
   cat("\n")
 }
 
+# ---- bivariate2 --------------
+varnames_bivariate <- setdiff(varnames,"letter_sent")
 
+ds %>% TabularManifest::histogram_discrete(
+  variable_name = "letter_sent",
+  main_title = varnames_varlabels["letter_sent"]
+) %>% print()
+cat("\n")
+
+for(item_i in varnames_bivariate){
+  cat("\n## ", item_i,"\n" )
+
+  g <- ds %>%
+    ggplot(aes_string(x = item_i, fill = "letter_sent")) +
+    geom_bar(position = "fill")+
+    coord_flip()+
+    labs(
+      fill = varnames_varlabels["letter_sent"]
+      ,y = "Percent"
+      , x = varnames_varlabels[item_i]
+    )+
+    guides(
+      fill = guide_legend(reverse = TRUE)
+    )+
+    theme_bw()+
+    theme(legend.position = "top")
+  g %>% print()
+  cat("\n")
+}
 
 
 # ---- publish ---------------------------------------

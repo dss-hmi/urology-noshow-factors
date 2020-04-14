@@ -83,11 +83,18 @@ read_chunk("./analysis/eda/eda.R")
 ```{r univariate, echo=FALSE, results='asis', message=FALSE, warning=F}
 ```
 
-# Bivariate 
+# Bivariate - Return to Care 
 This section shows the proportion of patients have "Returned to Care", broken down for each variables by its levels. 
 
 <!-- Basic graph view.   -->
 ```{r bivariate, echo=FALSE, results='asis', message=FALSE, warning=F}
+```
+
+# Bivariate - Letter Sent 
+This section shows the proportion of patients to who recieved follow up communication ("Letter Sent") broken down for each variables by its levels. 
+
+<!-- Basic graph view.   -->
+```{r bivariate2, echo=FALSE, results='asis', message=FALSE, warning=F}
 ```
 
 
