@@ -35,6 +35,7 @@ basic_model_info <- function(
 make_result_table <- function(
   model_object
 ){
+  # browser()
   (cf <- summary(model_object)$coefficients)
   # (cf <- model_object$coefficients)
   # (ci <- exp(cbind(coef(model_object), confint(model_object))))
@@ -51,9 +52,10 @@ make_result_table <- function(
   ds_table <- plyr::rename(ds_table, replace = c(
     "Estimate" = "estimate",
     "Std. Error"="sderr",
-    # "z value" ="zvalue",
-    "t value" ="tvalue",
-    "Pr(>|t|)"="pvalue"
+    "z value" ="zvalue",
+    # "t value" ="tvalue",
+    "Pr(>|z|)"="pvalue"
+    # "Pr(>|t|)"="pvalue"
     # "V1"="odds",
     # "2.5 %"  = "ci95_low",
     # "97.5 %"  ="ci95_high"
@@ -61,8 +63,8 @@ make_result_table <- function(
   # prepare for display
   ds_table$est <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$estimate, 2))
   ds_table$se <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$sderr, 2))
-  ds_table$t <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$tvalue, 3))
-  # ds_table$z <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$zvalue, 3))
+  # ds_table$t <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$tvalue, 3))
+  ds_table$z <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$zvalue, 3))
   # ds_table$p <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$pvalue, 4))
   ds_table$p <- as.numeric(round(ds_table$pvalue, 4))
   # ds_table$odds <- gsub("^([+-])?(0)?(\\.\\d+)$", "\\1\\3", round(ds_table$odds, 2))
