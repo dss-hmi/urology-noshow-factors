@@ -8,7 +8,7 @@ output:
     theme: simplex
     toc: yes
     toc_float: yes
-    code_folding: show
+    code_folding: hide
 ---
 
 <!-- These two chunks should be added in the beginning of every .Rmd that you want to source an .R script -->
@@ -47,9 +47,9 @@ options(width=120) #So the output is 50% wider than the default.
 # connect to the file with the underlying R script  
 read_chunk("./analysis/logistic/model-1.R") 
 ```
-This documents narrates the analysis of Titanic survival data.  
+This documents narrates the examination of the no-show data from pediatric urology clinic. 
 
-
+# Environment
 Packages that will be used in this analysis: 
 <!-- Load 'sourced' R files.  Suppress the output when loading packages. --> 
 ```{r load-packages, echo=TRUE, message=FALSE, warning=FALSE}
@@ -70,102 +70,52 @@ Packages that will be used in this analysis:
 #Put code in here.  It doesn't call a chunk in the codebehind file.
 ```
 
-# Wrangling
-
-## Load
+# Data
 
 Import the data prepared by the `./manipulation/0-greeter.R` 
 <!-- Load the datasets.   -->
 ```{r load-data, echo=echoChunks, results='show', message=FALSE}
 ```
 
-## Inspect 
-
 To better understand the data set, let us inspect quantitative properties of each variable
 <!-- Inspect the datasets.   -->
 ```{r inspect-data, echo=echoChunks, results='show', message=FALSE}
 ```
-
-## Tweak
-
 
 <!-- Tweak the dataset   -->
 ```{r tweak-data, echo=echoChunks, results='show', message=FALSE}
 ```
 
 
-# Tabulating
+# Part 1
 
-Summary tables to help us see observed differenced broken down by levels of predictors
+## Outcome
 
-<!-- Basic table view.   -->
-```{r basic-table, echo=TRUE, results='show', message=FALSE}
-```
-
-<!-- Basic graph view.   -->
-```{r basic-graph, echo=TRUE, results='show', message=FALSE}
+```{r part1_chunk1, echo=echoChunks, results='show', message=FALSE,cache=cacheChunks}
 ```
 
 # Modeling
 
-## Model 00 
-```{r model-00, echo=echoChunks, results='show', message=FALSE,cache=cacheChunks}
+```{r model-function, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
+```
+
+## Model 00 - Returned to Care 
+```{r m00, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
+```
+
+## Model 01 - Letter Sent
+```{r m01, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
 ```
 
 ### Graph 00 
-```{r graph-00, echo=echoChunks, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=cacheChunks, results='show'}
-```
-
-```{r model-00a, echo=echoChunks, results='show', message=FALSE,cache=cacheChunks}
+```{r graph-00, echo=echoChunks, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=cacheChunks, results='show', out.width="1200"}
 ```
 
 
 
-### Model 0
 
-```{r model-0, echo=echoChunks, results='show', message=FALSE,cache=cacheChunks}
-```
 
-### Graph (g0)
-```{r graph-0, echo=echoChunks, results='show', message=FALSE, warning=F,cache=cacheChunks}
-```
 
-<!--
-
-## 1 - Sex + Age
-
-### Summary (m1)
-
-```{r model-1, echo=echoChunks, results='show', message=FALSE}
-```
-
-### Graph (g1)
-
-```{r graph-1, echo=echoChunks, results='show', message=FALSE}
-```
-
-## 2 - Sex + Age + Class
-
-### Summary (m2)
-
-```{r model-2, echo=echoChunks, results='show', message=FALSE}
-```
-
-### Graph (g2)
-```{r graph-2, echo=echoChunks, results='show', message=FALSE}
-```
-
-## 3 - Sex + Age + Class + Port
-
-### Summary (m3)
-
-```{r model-3, echo=echoChunks, results='show', message=FALSE}
-```
-
-### Graph (g3)
-```{r graph-3, echo=echoChunks, results='show', message=FALSE}
-```
--->
 
 session information
 ===========================================================================

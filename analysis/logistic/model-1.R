@@ -21,7 +21,7 @@ requireNamespace("DT", quietly=TRUE) # for dynamic tables
 #   into memory.  Avoid side effects and don't pollute the global environment.
 source("./scripts/common-functions.R") # used in multiple reports
 source("./scripts/graphing/graph-presets.R") # fonts, colors, themes
-
+source("./scripts/modeling/model-basic.R")
 # ----- declare-globals ----------------
 varnames_varlabels <- c(
   "patient_id"            = "Patient Id"
@@ -55,91 +55,105 @@ returned_to_care_colors <- c(
 # ---- load-data -------------------------------------------------------------
 ds <- readRDS("./data-unshared/derived/0-greeted.rds")
 # ---- inspect-data -------------------------------------------------------------
-# ds %>% glimpse()
-ds %>% explore::describe_all() %>% neat()
+ds %>% glimpse()
+# ds %>% explore::describe_all() %>% neat()
 # ---- tweak-data --------------------------------------------------------------
-ds <- ds %>%
+ds1 <- ds %>%
   dplyr::filter(!is.na(reason_for_visit)) %>%
   dplyr::mutate(
-    letter_sent = factor(letter_sent, level = c(TRUE,FALSE), labels = c("Letter sent", "No letter sent"))
-    ,returned_to_care = factor(returned_to_care, level = c(TRUE, FALSE), labels = c("Returned to care", "No show"))
+    # returned_to_care = as.integer(returned_to_care)
+    # returned_to_care = factor(returned_to_care, level = c(FALSE, TRUE), labels = c("No show","Returned to care"))
+    # ,returned_to_care = relevel(f)
+    letter_sent = factor(letter_sent, level = c(FALSE,TRUE), labels = c("No letter sent", "Letter sent"))
+    ,letter_sent = relevel(factor(letter_sent),  ref = "Letter sent")
+    # letter_sent = as.integer(letter_sent)
+    # ,returned_to_care = as.integer(returned_to_care)
+    ,reason_for_visit = relevel(factor(reason_for_visit), ref = "Voiding")
+    ,provider = relevel(factor(provider), ref = "ARNP")
+    ,month_of_appointment = relevel(factor(month_of_appointment), ref = "Sep")
+    ,pm_appointment = relevel(factor(pm_appointment), ref = "TRUE")
+
   )
 
+ds2 <- ds1 %>%
+  dplyr::filter(!reason_for_visit %in% c("Female gyn","Bladder") ) %>%
+  dplyr::filter(insurance != "None") %>%
+  dplyr::filter(history_noshow != "Both") %>%
+  dplyr::filter(preferred_language != "Other")
 
-# create a new copy that will store tweeks
-ds1 <- ds
-# create an alias data set for modeling
-ds_modeling <- ds1
-# ds_modeling %>% glimpse()
+ds3 <- ds2 %>% gdata::drop.levels(reorder=FALSE)
 
-# ---- basic-table --------------------------------------------------------------
-dt1 <- ds_modeling %>%
-  dplyr::group_by(returned_to_care, letter_sent) %>%
-  dplyr::summarize(
-    n_people = n()
-  ) %>%
-  dplyr::group_by(returned_to_care) %>%
-  dplyr::mutate(
-    pct_returned_to_care = sum(n_people, na.rm =T)
-    ,pct_returned_to_care = n_people/pct_returned_to_care
-    ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
-  ) %>%
-  dplyr::group_by(letter_sent) %>%
-  dplyr::mutate(
-    pct_letter_sent = sum(n_people, na.rm =T)
-    ,pct_letter_sent = scales::label_percent()(n_people/pct_letter_sent)
-    # ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
-  )
-dt2 <- table(ds_modeling$letter_sent, ds_modeling$returned_to_care)
-
-dt1 %>%
-  ggplot(aes(x = letter_sent, y = n_people, fill = returned_to_care))+
-  geom_col(position = position_dodge())+
-  geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "black", size = 5 )+
-  geom_text(aes(label = pct_letter_sent),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
-  scale_fill_manual(values = returned_to_care_colors)+
-  theme_minimal()+
-  scale_y_continuous(limit = c(0,450))+
-  theme(legend.position = "top")+
-  labs(
-    title = "Patients returning to care after in-mail follow up"
-    ,x = "", y = "Number of patients"
-    ,fill = ""
-  )
-
-dt1 %>%
-  ggplot(aes(x = returned_to_care, y = n_people, fill = letter_sent))+
-  geom_col(position = position_dodge())+
-  geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "white", size = 5 )+
-  geom_text(aes(label = pct_returned_to_care),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
-  scale_fill_manual(values = letter_sent_colors)+
-  scale_y_continuous(limit = c(0,450))+
-  theme_minimal()+
-  theme(legend.position = "top")+
-  labs(
-    title = "Patients returning to care after in-mail follow up"
-    ,x = "", y = "Number of patients"
-    ,fill = ""
-  )
-
-ds_modeling %>%
-  dplyr::select(returned_to_care, letter_sent) %>%
-  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Follow-up"),
-                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
-
-# chi_square_test <- chisq.test(table(ds_modeling$returned_to_care, ds_modeling$letter_sent))
-# chi_square_test
-
-mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
-           main = "Patients returning to care after in-mail follow up"
-           ,xlab = "Follow up Communication", y = "Returned to Care"
-           ,shade = TRUE)
+# ds$reason_for_visit %>% contrasts()
+# ds1$reason_for_visit %>% contrasts()
+# ds2$reason_for_visit %>% contrasts()
+# ds3$reason_for_visit %>% contrasts()
 
 
+ds_modeling <- ds3
+ds_modeling %>% glimpse(90)
 
+# ---- part1_chunk1  --------------------------------------------------------------
+# dt1 <- ds_modeling %>%
+#   dplyr::group_by(returned_to_care, letter_sent) %>%
+#   dplyr::summarize(
+#     n_people = n()
+#   ) %>%
+#   dplyr::group_by(returned_to_care) %>%
+#   dplyr::mutate(
+#     pct_returned_to_care = sum(n_people, na.rm =T)
+#     ,pct_returned_to_care = n_people/pct_returned_to_care
+#     ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
+#   ) %>%
+#   dplyr::group_by(letter_sent) %>%
+#   dplyr::mutate(
+#     pct_letter_sent = sum(n_people, na.rm =T)
+#     ,pct_letter_sent = scales::label_percent()(n_people/pct_letter_sent)
+#     # ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
+#   )
+# dt2 <- table(ds_modeling$letter_sent, ds_modeling$returned_to_care)
+#
+# dt1 %>%
+#   ggplot(aes(x = letter_sent, y = n_people, fill = returned_to_care))+
+#   geom_col(position = position_dodge())+
+#   geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "black", size = 5 )+
+#   geom_text(aes(label = pct_letter_sent),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
+#   scale_fill_manual(values = returned_to_care_colors)+
+#   theme_minimal()+
+#   scale_y_continuous(limit = c(0,450))+
+#   theme(legend.position = "top")+
+#   labs(
+#     title = "Patients returning to care after in-mail follow up"
+#     ,x = "", y = "Number of patients"
+#     ,fill = ""
+#   )
+#
+# dt1 %>%
+#   ggplot(aes(x = returned_to_care, y = n_people, fill = letter_sent))+
+#   geom_col(position = position_dodge())+
+#   geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "white", size = 5 )+
+#   geom_text(aes(label = pct_returned_to_care),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
+#   scale_fill_manual(values = letter_sent_colors)+
+#   scale_y_continuous(limit = c(0,450))+
+#   theme_minimal()+
+#   theme(legend.position = "top")+
+#   labs(
+#     title = "Patients returning to care after in-mail follow up"
+#     ,x = "", y = "Number of patients"
+#     ,fill = ""
+#   )
+#
+# mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
+#            main = "Patients returning to care after in-mail follow up"
+#            ,xlab = "Follow up Communication", y = "Returned to Care"
+#            ,shade = TRUE)
+#
+# ds_modeling %>%
+#   dplyr::select(returned_to_care, letter_sent) %>%
+#   sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Follow-up"),
+#                 show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+# # Test of independence shows no significant association.
+# # Patients who recieved a follow-up letter are not more likely to return to care
 
-# Test of independence shows no significant association
-# Patients who recieved a follow-up letter are not more likely to return to care
 
 # ---- basic-graph --------------------------------------------------------------
 
@@ -161,20 +175,7 @@ mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
 
 
 
-# ---- model-00 --------------------------------------------------------------
-stem <- "returned_to_care ~ "
-predictors_00 <- c(
-  # "-1"
-  "reason_for_visit"
-  ,"history_noshow"
-  ,"month_of_appointment"
-  ,"pm_appointment"
-  ,"male"
-  ,"provider"
-  ,"insurance"
-  ,"preferred_language"
-  ,"letter_sent"
-)
+# ---- model-function --------------------------------------------------------------
 
 run_logistic <- function(d,p){
   # d <- ds_modeling
@@ -186,20 +187,11 @@ run_logistic <- function(d,p){
 
   model <- stats::glm(
     formula = eq_formula
-    ,family = "binomial"
+    # ,family = "binomial"
+    ,family=binomial(link=logit)
     ,data = d %>%
       select(-patient_id)
   )
-  print(eq_formula, showEnv = F)
-  summary(model) %>% print()
-  # summary(model)$coefficients %>% neat(output_format = "pandoc") %>% print()
-  # https://datascienceplus.com/perform-logistic-regression-in-r/
-  anova(model, test="Chisq") %>% print()
-  # even after controlling for all predictors, sending a letter is associated with improvement of model fit (significant predictor)
-
-  # Producing the odds-ratios for the fitted model
-  exp(cbind(OR = coef(model), confint(model))) %>% print()
-
   # create levels of predictors for which to generate predicted values
   d_predicted <- d %>%
     dplyr::select(p) %>%
@@ -209,21 +201,91 @@ run_logistic <- function(d,p){
     dplyr::mutate(
       log_odds = predict(object = model, newdata = .)
       ,probability = plogis(log_odds)
+      # ,prob1 = predict.glm(object = model, newdata = .,type = "response")
     )
+  ls_out[["equation"]] <- eq_formula
   ls_out[["model"]] <- model
   ls_out[["predicted"]] <- d_predicted
   return(ls_out)
 }
 # How to use
+# lsm00 <- ds_modeling %>% run_logistic(predictors_00)
+# model <- lsm00$model
+
+# ---- m00 ------------------
+stem <- "returned_to_care ~ "
+predictors_00 <- c(
+  # "1"
+  "insurance"
+  ,"history_noshow"
+  ,"provider"
+  ,"pm_appointment"
+  ,"preferred_language"
+  ,"month_of_appointment"
+  ,"male"
+  ,"reason_for_visit"
+  ,"letter_sent"
+)
 lsm00 <- ds_modeling %>% run_logistic(predictors_00)
 model <- lsm00$model
-exp(cbind(OR = coef(model), confint(model))) %>% print()
+
+print(model$formula, showEnv = F)
+cat("R-Squared, Proportion of Variance Explained = ",
+    scales::percent((1 - (summary(model)$deviance/summary(model)$null.deviance)),accuracy = .01)
+    )
+cat("MODEL FIT",
+    "\nChi-Square = ", with(model, null.deviance - deviance),
+    "\ndf = ", with(model, df.null - df.residual),
+    "\np-value = ", with(model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+    )
+summary(model) %>% print()
+exp(cbind(OR = coef(model), confint(model))) %>% neat()
+# summary(model)$coefficients %>% neat(output_format = "pandoc") %>% print()
+# https://datascienceplus.com/perform-logistic-regression-in-r/
+anova(model, test="Chisq") %>% print()
+
+# ---- m01 ------------------
+stem <- "letter_sent ~ "
+predictors_01 <- c(
+  # "1"
+  "insurance"
+  ,"history_noshow"
+  ,"provider"
+  ,"pm_appointment"
+  ,"preferred_language"
+  ,"month_of_appointment"
+  ,"male"
+  ,"reason_for_visit"
+  ,"returned_to_care"
+)
+lsm01 <- ds_modeling %>%
+  dplyr::mutate(
+    letter_sent = relevel(factor(letter_sent),  ref = "No letter sent")
+  ) %>%
+  run_logistic(predictors_01)
+model <- lsm01$model
+
+print(model$formula, showEnv = F)
+cat("R-Squared, Proportion of Variance Explained = ",
+    scales::percent((1 - (summary(model)$deviance/summary(model)$null.deviance)),accuracy = .01)
+    )
+cat("MODEL FIT",
+    "\nChi-Square = ", with(model, null.deviance - deviance),
+    "\ndf = ", with(model, df.null - df.residual),
+    "\np-value = ", with(model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+    )
+summary(model) %>% print()
+exp(cbind(OR = coef(model), confint(model))) #%>% neat()
+# summary(model)$coefficients %>% neat(output_format = "pandoc") %>% print()
+# https://datascienceplus.com/perform-logistic-regression-in-r/
+anova(model, test="Chisq") %>% print()
+
 # ---- graph-00 -----------------------------------------------------------------
 
 g00 <- lsm00$predicted %>%
-  dplyr::filter(!reason_for_visit %in% c("female gyn", "bladder") ) %>%
-  dplyr::filter(!history_noshow %in% c("Both") ) %>%
-  dplyr::filter(provider != "PA") %>%
+  # dplyr::filter(!reason_for_visit %in% c("female gyn", "bladder") ) %>%
+  # dplyr::filter(!history_noshow %in% c("Both") ) %>%
+  # dplyr::filter(provider != "PA") %>%
   # ggplot(aes(x = letter_sent, y = probability, fill = letter_sent))+
   # ggplot(aes(x = provider, y = probability, fill = letter_sent))+
   ggplot(aes(x = provider, y = probability, fill = provider))+
@@ -234,12 +296,11 @@ g00 <- lsm00$predicted %>%
   facet_grid(history_noshow ~ reason_for_visit)+
   theme_bw()
 
-g <- plotly::ggplotly(g00)
-g
+g00
 
-g00 <- lsm00$predicted %>%
-  dplyr::filter(!reason_for_visit %in% c("female gyn", "bladder") ) %>%
-  dplyr::filter(!history_noshow %in% c("Both") ) %>%
+g01 <- lsm00$predicted %>%
+  # dplyr::filter(!reason_for_visit %in% c("female gyn", "bladder") ) %>%
+  # dplyr::filter(!history_noshow %in% c("Both") ) %>%
   # dplyr::filter(provider != "PA") %>%
   # ggplot(aes(x = letter_sent, y = probability, fill = letter_sent))+
   # ggplot(aes(x = provider, y = probability, fill = letter_sent))+
@@ -251,8 +312,8 @@ g00 <- lsm00$predicted %>%
   facet_grid(provider ~ reason_for_visit)+
   theme_bw()
 
-g <- plotly::ggplotly(g00)
-g
+
+g01
 
 #  Does letter make a difference in different insurance plans?
 
