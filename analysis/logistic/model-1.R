@@ -61,99 +61,138 @@ ds %>% glimpse()
 ds1 <- ds %>%
   dplyr::filter(!is.na(reason_for_visit)) %>%
   dplyr::mutate(
-    # returned_to_care = as.integer(returned_to_care)
-    # returned_to_care = factor(returned_to_care, level = c(FALSE, TRUE), labels = c("No show","Returned to care"))
-    # ,returned_to_care = relevel(f)
-    letter_sent = factor(letter_sent, level = c(FALSE,TRUE), labels = c("No letter sent", "Letter sent"))
-    ,letter_sent = relevel(factor(letter_sent),  ref = "Letter sent")
-    # letter_sent = as.integer(letter_sent)
-    # ,returned_to_care = as.integer(returned_to_care)
-    ,reason_for_visit = relevel(factor(reason_for_visit), ref = "Voiding")
-    ,provider = relevel(factor(provider), ref = "ARNP")
+    returned_to_care = factor(
+      returned_to_care
+      , level  = c(FALSE, TRUE)
+      , labels = c("No show","Returned to care")
+      )
+    ,returned_to_care = relevel(factor(returned_to_care),         ref = "No show")
+    ,letter_sent = factor(
+      letter_sent
+      , level  = c(FALSE,TRUE)
+      , labels = c("No letter sent", "Letter sent")
+    )
+    ,letter_sent          = relevel(factor(letter_sent),          ref = "Letter sent")
+    ,reason_for_visit     = relevel(factor(reason_for_visit),     ref = "Voiding")
+    ,provider             = relevel(factor(provider),             ref = "ARNP")
     ,month_of_appointment = relevel(factor(month_of_appointment), ref = "Sep")
-    ,pm_appointment = relevel(factor(pm_appointment), ref = "TRUE")
+    ,pm_appointment       = relevel(factor(pm_appointment),       ref = "TRUE")
 
   )
 
+# ---- drop-small-groups --------------------
+# some of response categories were too smal and destabilized the model fitting
+ds1 %>% group_by(reason_for_visit) %>% count()
+ds1 %>% group_by(insurance) %>% count()
+ds1 %>% group_by(history_noshow) %>% count()
+ds1 %>% group_by(preferred_language) %>% count()
+# total number of initial observation
+(initial_obs <- ds1 %>% count())
+# remove observations belonging to underrepresented groups
 ds2 <- ds1 %>%
   dplyr::filter(!reason_for_visit %in% c("Female gyn","Bladder") ) %>%
   dplyr::filter(insurance != "None") %>%
   dplyr::filter(history_noshow != "Both") %>%
   dplyr::filter(preferred_language != "Other")
+# remove the empty levels of factor variables
+ds2 <- ds2 %>% gdata::drop.levels(reorder=FALSE)
+# resulting number of observations
+(remaining_obs <- ds2 %>% count())
+# number of observations removed
+(initial_obs - remaining_obs )
+# percent of initial observations removed
+((initial_obs - remaining_obs )/initial_obs) %>% pull() %>% scales::percent()
 
-ds3 <- ds2 %>% gdata::drop.levels(reorder=FALSE)
-
-# ds$reason_for_visit %>% contrasts()
-# ds1$reason_for_visit %>% contrasts()
-# ds2$reason_for_visit %>% contrasts()
-# ds3$reason_for_visit %>% contrasts()
-
-
-ds_modeling <- ds3
+ds_modeling <- ds1
 ds_modeling %>% glimpse(90)
 
 # ---- part1_chunk1  --------------------------------------------------------------
-# dt1 <- ds_modeling %>%
-#   dplyr::group_by(returned_to_care, letter_sent) %>%
-#   dplyr::summarize(
-#     n_people = n()
-#   ) %>%
-#   dplyr::group_by(returned_to_care) %>%
-#   dplyr::mutate(
-#     pct_returned_to_care = sum(n_people, na.rm =T)
-#     ,pct_returned_to_care = n_people/pct_returned_to_care
-#     ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
-#   ) %>%
-#   dplyr::group_by(letter_sent) %>%
-#   dplyr::mutate(
-#     pct_letter_sent = sum(n_people, na.rm =T)
-#     ,pct_letter_sent = scales::label_percent()(n_people/pct_letter_sent)
-#     # ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
-#   )
-# dt2 <- table(ds_modeling$letter_sent, ds_modeling$returned_to_care)
-#
-# dt1 %>%
-#   ggplot(aes(x = letter_sent, y = n_people, fill = returned_to_care))+
-#   geom_col(position = position_dodge())+
-#   geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "black", size = 5 )+
-#   geom_text(aes(label = pct_letter_sent),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
-#   scale_fill_manual(values = returned_to_care_colors)+
-#   theme_minimal()+
-#   scale_y_continuous(limit = c(0,450))+
-#   theme(legend.position = "top")+
-#   labs(
-#     title = "Patients returning to care after in-mail follow up"
-#     ,x = "", y = "Number of patients"
-#     ,fill = ""
-#   )
-#
-# dt1 %>%
-#   ggplot(aes(x = returned_to_care, y = n_people, fill = letter_sent))+
-#   geom_col(position = position_dodge())+
-#   geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "white", size = 5 )+
-#   geom_text(aes(label = pct_returned_to_care),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
-#   scale_fill_manual(values = letter_sent_colors)+
-#   scale_y_continuous(limit = c(0,450))+
-#   theme_minimal()+
-#   theme(legend.position = "top")+
-#   labs(
-#     title = "Patients returning to care after in-mail follow up"
-#     ,x = "", y = "Number of patients"
-#     ,fill = ""
-#   )
-#
-# mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
-#            main = "Patients returning to care after in-mail follow up"
-#            ,xlab = "Follow up Communication", y = "Returned to Care"
-#            ,shade = TRUE)
-#
-# ds_modeling %>%
-#   dplyr::select(returned_to_care, letter_sent) %>%
-#   sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Follow-up"),
-#                 show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
-# # Test of independence shows no significant association.
-# # Patients who recieved a follow-up letter are not more likely to return to care
+dt1 <- ds_modeling %>%
+  dplyr::group_by(returned_to_care, letter_sent) %>%
+  dplyr::summarize(
+    n_people = n()
+  ) %>%
+  dplyr::group_by(returned_to_care) %>%
+  dplyr::mutate(
+    pct_returned_to_care = sum(n_people, na.rm =T)
+    ,pct_returned_to_care = n_people/pct_returned_to_care
+    ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
+  ) %>%
+  dplyr::group_by(letter_sent) %>%
+  dplyr::mutate(
+    pct_letter_sent = sum(n_people, na.rm =T)
+    ,pct_letter_sent = scales::label_percent()(n_people/pct_letter_sent)
+    # ,pct_returned_to_care = scales::label_percent()(pct_returned_to_care)
+  )
+dt2 <- table(ds_modeling$letter_sent, ds_modeling$returned_to_care)
 
+dt1 %>%
+  ggplot(aes(x = letter_sent, y = n_people, fill = returned_to_care))+
+  geom_col(position = position_dodge())+
+  geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "black", size = 5 )+
+  geom_text(aes(label = pct_letter_sent),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
+  scale_fill_manual(values = returned_to_care_colors)+
+  theme_minimal()+
+  scale_y_continuous(limit = c(0,450))+
+  theme(legend.position = "top")+
+  labs(
+    title = "Patients returning to care after in-mail follow up"
+    ,x = "", y = "Number of patients"
+    ,fill = ""
+  )
+#
+dt1 %>%
+  ggplot(aes(x = returned_to_care, y = n_people, fill = letter_sent))+
+  geom_col(position = position_dodge())+
+  geom_text(aes(label = n_people),position = position_dodge(.9), vjust = 1.5, color = "white", size = 5 )+
+  geom_text(aes(label = pct_returned_to_care),position = position_dodge(.9), vjust = -.5, color = "blue", size = 4)+
+  scale_fill_manual(values = letter_sent_colors)+
+  scale_y_continuous(limit = c(0,450))+
+  theme_minimal()+
+  theme(legend.position = "top")+
+  labs(
+    title = "Patients returning to care after in-mail follow up"
+    ,x = "", y = "Number of patients"
+    ,fill = ""
+  )
+
+mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
+           main = "Patients returning to care after in-mail follow up"
+           ,xlab = "Follow up Communication", y = "Returned to Care"
+           ,shade = TRUE)
+#
+ds_modeling %>%
+  dplyr::select(returned_to_care, letter_sent) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Follow-up"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+# Test of independence shows no significant association.
+# Patients who recieved a follow-up letter are not more likely to return to care
+
+# ---- part1_chunk2  --------------------------------------------------------------
+
+mosaicplot(~letter_sent + reason_for_visit, data = ds_modeling,
+           main = "Patients returning to care after in-mail follow up"
+           ,xlab = "Follow up Communication", y = "Reason to visit"
+           ,shade = TRUE)
+#
+ds_modeling %>%
+  dplyr::select(reason_for_visit, letter_sent) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Reason for visit", "Follow-up"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+
+# ---- part1_chunk2  --------------------------------------------------------------
+mosaicplot(~provider + letter_sent, data = ds_modeling,
+           main = "Patients returning to care after in-mail follow up"
+           ,xlab = "Follow up Communication", y = "Provider"
+           ,shade = TRUE)
+#
+ds_modeling %>%
+  # dplyr::select(provider, letter_sent) %>%
+  dplyr::select( letter_sent, provider) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Follow-up","Provider"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+# ARNP are signficantly less likely to send out the letter
+# PA are signfificantly more likely to sound out the letter
 
 # ---- basic-graph --------------------------------------------------------------
 

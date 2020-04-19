@@ -8,7 +8,7 @@ output:
     theme: simplex
     toc: yes
     toc_float: yes
-    code_folding: hide
+    code_folding: show
 ---
 
 <!-- These two chunks should be added in the beginning of every .Rmd that you want to source an .R script -->
@@ -83,7 +83,7 @@ To better understand the data set, let us inspect quantitative properties of eac
 ```
 
 <!-- Tweak the dataset   -->
-```{r tweak-data, echo=echoChunks, results='show', message=FALSE}
+```{r tweak-data, echo=TRUE, results='show', message=FALSE}
 ```
 
 
