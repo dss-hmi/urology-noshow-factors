@@ -344,36 +344,17 @@ outcome <- "returned_to_care ~"
 
 l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_for_visit"))
 l$model %>% get_rsquared()
-l$model %>% get_model_fit()
+
 
 l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_for_visit", "letter_sent"))
 l$model %>% get_rsquared()
-l$model %>% get_model_fit()
-l$model %>% anova(test="Chisq") %>% print()
-exp(cbind(OR = coef(model), confint(model)))
 
-l <- ds_modeling %>% run_logistic(c("provider","reason_for_visit", "letter_sent","month_of_appointment"))
-l$model %>% anova(test="Chisq") %>% print()
-
-l <- ds_modeling %>% run_logistic(c("reason_for_visit", "letter_sent","month_of_appointment","provider"))
-l$model %>% anova(test="Chisq") %>% print()
-
-l <- ds_modeling %>% run_logistic(c("provider", "letter_sent","month_of_appointment","reason_for_visit"))
-l$model %>% anova(test="Chisq") %>% print()
-
-l <- ds_modeling %>% run_logistic(c("letter_sent","month_of_appointment","provider","reason_for_visit"))
-l$model %>% anova(test="Chisq") %>% print()
-
-l <- ds_modeling %>% run_logistic(c("letter_sent","month_of_appointment","reason_for_visit","provider", "history_noshow"))
-l$model %>% anova(test="Chisq") %>% print()
-exp(cbind(OR = coef(l$model), confint(l$model)))
-
-l <- ds_modeling %>% run_logistic(c("history_noshow","letter_sent","month_of_appointment","reason_for_visit","provider"))
-l$model %>% anova(test="Chisq") %>% print()
-exp(cbind(OR = coef(l$model), confint(l$model)))
+l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_for_visit", "letter_sent", "history_noshow"))
+l$model %>% get_rsquared()
 
 
-# ----- returned_1 ---------------
+
+# ----- returned_0 ---------------
 ds_modeling %>%
   dplyr::select(returned_to_care, letter_sent) %>%
   sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Follow-up"),
@@ -383,7 +364,141 @@ mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
            ,xlab = "Follow up Communication", y = "Returned to Care"
            ,shade = TRUE)
 
-# ----- returned_2 ---------------
+
+
+# ---- returned_1 -----------------------
+# insurance
+ds_modeling %>%
+  dplyr::select(returned_to_care, insurance) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Insurance"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~insurance + returned_to_care, data = ds_modeling,
+           main = "Patients returning to care by Insurance"
+           ,xlab = "Insurance", y = "Returned to Care"
+           ,shade = TRUE)
+
+outcome <- "returned_to_care ~"
+l <- ds_modeling %>% run_logistic("insurance")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+# Insurance does not appear to be related to return (ChiSq = 0,df =1, p = .92)
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"insurance"              # Variance Explained (on its own) = 0.00%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+
+# ---- returned_2 -----------------------
+# pm_appointment
+ds_modeling %>%
+  dplyr::select(returned_to_care, pm_appointment) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "PM Appointment"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~pm_appointment + returned_to_care, data = ds_modeling,
+           main = "Patients returning to care by PM Appointment"
+           ,xlab = "PM Appointment", y = "Returned to Care"
+           ,shade = TRUE)
+
+outcome <- "returned_to_care ~"
+l <- ds_modeling %>% run_logistic("pm_appointment")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- returned_3 -----------------------
+# preferred_language
+ds_modeling %>%
+  dplyr::select(returned_to_care, preferred_language) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Preferred Language"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~preferred_language + returned_to_care, data = ds_modeling,
+           main = "Patients returning to care by Preferred Language"
+           ,xlab = "Preferred Language", y = "Returned to Care"
+           ,shade = TRUE)
+
+outcome <- "returned_to_care ~"
+l <- ds_modeling %>% run_logistic("preferred_language")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- returned_4 -----------------------
+# male
+ds_modeling %>%
+  dplyr::select(returned_to_care, male) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Gender"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~male + returned_to_care, data = ds_modeling,
+           main = "Patients returning to care by Gender"
+           ,xlab = "Gender", y = "Returned to Care"
+           ,shade = TRUE)
+
+outcome <- "returned_to_care ~"
+l <- ds_modeling %>% run_logistic("male")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- returned_5 -----------------------
 # history_noshow
 ds_modeling %>%
   dplyr::select(returned_to_care, history_noshow) %>%
@@ -405,21 +520,57 @@ exp(cbind(OR = coef(l$model), confint(l$model)))
 
 outcome <- "returned_to_care ~ "
 predictors <- c(
-
-  "insurance"
-  ,"pm_appointment"
-  ,"preferred_language"
-  ,"male"
-  ,"month_of_appointment"
-  ,"provider"
-  ,"reason_for_visit"
-  ,"letter_sent"
-  ,"history_noshow"
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
 )
 l <- ds_modeling %>% run_logistic(predictors)
 l$model %>% anova(test="Chisq") %>% print()
-#
-# ----- returned_3 ---------------
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- returned_6 -----------------------
+# month_of_appointment
+ds_modeling %>%
+  dplyr::select(returned_to_care, month_of_appointment) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Month of Appointment"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~month_of_appointment + returned_to_care, data = ds_modeling,
+           main = "Patients returning to care by Month of Appointment"
+           ,xlab = "Month of Appointment", y = "Returned to Care"
+           ,shade = TRUE)
+
+outcome <- "returned_to_care ~"
+l <- ds_modeling %>% run_logistic("month_of_appointment")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+# month_of_appointment  is significantly associated with return (ChiSq = 20.9,df = 11, p = .03)
+# Appointment made in Septermber are least likely to return to care
+# Appointment made in May are most likely to return to care, 5.34 times more likely that in Septermber
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- returned_7 -----------------------
 # provider
 ds_modeling %>%
   dplyr::select(returned_to_care, provider) %>%
@@ -439,8 +590,23 @@ exp(cbind(OR = coef(l$model), confint(l$model)))
 # provider is significanlty associated with return
 # those seen by MD are 2.62 times more likely to return than those seen by ARNP
 # those seen by PA are 2.31 times more likely to return than those seen by ARNP
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
 
-# ----- returned_4 ---------------
+# ---- returned_8 -----------------------
 # reason_for_visit
 ds_modeling %>%
   dplyr::select(returned_to_care, reason_for_visit) %>%
@@ -461,48 +627,22 @@ exp(cbind(OR = coef(l$model), confint(l$model)))
 # Patients who came for Renal/Uterer were 4.02 time more likely return than Voiding
 # Patients who came for Testies/Scrotum were 2.87 time more likely return than Voiding
 # Patients who came for Penile  were 1.97 time more likely return than Voiding
-
-# ----- returned_5 ---------------
-# month_of_appointment
-ds_modeling %>%
-  dplyr::select(returned_to_care, month_of_appointment) %>%
-  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Month of Appointment"),
-                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
-mosaicplot(~month_of_appointment + returned_to_care, data = ds_modeling,
-           main = "Patients returning to care by Month of Appointment"
-           ,xlab = "Month of Appointment", y = "Returned to Care"
-           ,shade = TRUE)
-
-outcome <- "returned_to_care ~"
-l <- ds_modeling %>% run_logistic("month_of_appointment")
-l$model %>% get_rsquared()
-l$model %>% get_model_fit()
-summary(l$model) %>% print()
+outcome <- "returned_to_care ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.20%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.34%
+  ,"male"                  # Variance Explained (on its own) = 0.55%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.68%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 2.43%
+  ,"provider"              # Variance Explained (on its own) = 2.65%
+  ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 3.19%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
 exp(cbind(OR = coef(l$model), confint(l$model)))
-# month_of_appointment  is significantly associated with return (ChiSq = 20.9,df = 11, p = .03)
-# Appointment made in Septermber are least likely to return to care
-# Appointment made in May are most likely to return to care, 5.34 times more likely that in Septermber
 
-# ----- returned_6 ---------------
-# insurance
-ds_modeling %>%
-  dplyr::select(returned_to_care, insurance) %>%
-  sjPlot::sjtab(fun = "xtab", var.labels=c("Returned to Care", "Insurance"),
-                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
-mosaicplot(~insurance + returned_to_care, data = ds_modeling,
-           main = "Patients returning to care by Insurance"
-           ,xlab = "Insurance", y = "Returned to Care"
-           ,shade = TRUE)
-
-outcome <- "returned_to_care ~"
-l <- ds_modeling %>% run_logistic("insurance")
-l$model %>% get_rsquared()
-l$model %>% get_model_fit()
-summary(l$model) %>% print()
-exp(cbind(OR = coef(l$model), confint(l$model)))
-# Insurance does not appear to be related to return (ChiSq = 0,df =1, p = .92)
-
-# ----- returned_7 ---------------
 
 
 # ---- m01 ------------------
