@@ -90,23 +90,64 @@ To better understand the data set, let us inspect quantitative properties of eac
 ```{r drop-small-groups, echo=TRUE, results='show', message=FALSE}
 ```
 
+
 # Model
+
 ```{r model-function, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
 ```
 
-## Model 01 - Letter Sent
+## All predictors
 ```{r m01, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
 ```
 
-Observations:  
-- `provider` was significantly  MD and PA were significantly more likely to send the letter after the visit:
-# Sex of the patient was signifantly related to recieving the letter
-
-
-
-## 1 - Reason for visit
-```{r letter_1, echo=echoChunks, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=cacheChunks, results='show', out.width="1200"}
+## Selected predictors
+```{r m01a, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
 ```
+
+## Selected combinations
+```{r m01b, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
+```
+
+<!-- ### Graph 00  -->
+<!-- ```{r graph-00, echo=echoChunks, fig.height=8, fig.width=12, message=FALSE, warning=FALSE, cache=cacheChunks, results='show', out.width="1200"} -->
+<!-- ``` -->
+
+## Letter Sent
+```{r letter_0, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## Insurance
+```{r letter_1, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## PM Appointment
+```{r letter_2, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## Preferred Language
+```{r letter_3, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## Gender
+```{r letter_4, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## History of No-Show
+```{r letter_5, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## Month of Appointment
+```{r letter_6, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+## Provider
+```{r letter_7, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+## Reason for Visit
+```{r letter_8, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks,fig.height=8, fig.width=12}
+```
+
+
 
 
 
