@@ -353,7 +353,6 @@ l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_fo
 l$model %>% get_rsquared()
 
 
-
 # ----- returned_0 ---------------
 ds_modeling %>%
   dplyr::select(returned_to_care, letter_sent) %>%
@@ -363,7 +362,6 @@ mosaicplot(~letter_sent + returned_to_care, data = ds_modeling,
            main = "Patients returning to care after in-mail follow up"
            ,xlab = "Follow up Communication", y = "Returned to Care"
            ,shade = TRUE)
-
 
 
 # ---- returned_1 -----------------------
@@ -645,84 +643,19 @@ exp(cbind(OR = coef(l$model), confint(l$model)))
 
 
 
-# ---- m01 ------------------
-# stem <- "letter_sent ~ "
-outcome <- "letter_sent ~ "
-predictors_01 <- c(
-  # "1"
-  "insurance"
-  ,"history_noshow"
-  ,"provider"
-  ,"pm_appointment"
-  ,"preferred_language"
-  ,"month_of_appointment"
-  ,"male"
-  ,"reason_for_visit"
-)
-lsm01 <- ds_modeling %>%
-  dplyr::mutate(
-    letter_sent = relevel(factor(letter_sent),  ref = "No letter sent")
-  ) %>%
-  run_logistic(predictors_01)
-model <- lsm01$model
-
-print(model$formula, showEnv = F)
-cat("R-Squared, Proportion of Variance Explained = ",
-    scales::percent((1 - (summary(model)$deviance/summary(model)$null.deviance)),accuracy = .01)
-    )
-cat("MODEL FIT",
-    "\nChi-Square = ", with(model, null.deviance - deviance),
-    "\ndf = ", with(model, df.null - df.residual),
-    "\np-value = ", with(model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
-    )
-summary(model) %>% print()
-
-exp(cbind(OR = coef(model), confint(model))) #%>% neat()
-# summary(model)$coefficients %>% neat(output_format = "pandoc") %>% print()
-# https://datascienceplus.com/perform-logistic-regression-in-r/
-anova(model, test="Chisq") %>% print()
-
-
-# ---- m01a --------------------
-outcome <- "letter_sent ~ "
-predictors_01a <- c(
-  # "1"
-  # "insurance"
-  # "history_noshow"
-  # "provider"
-  # "pm_appointment"
-  # "preferred_language"
-  # "month_of_appointment"
-  # "male"
-  # "reason_for_visit"
-  "letter_sent"
-)
-lsm01a <- ds_modeling %>%
-  dplyr::mutate(
-    letter_sent = relevel(factor(letter_sent),  ref = "No letter sent")
-  ) %>%
-  run_logistic(predictors_01a)
-model <- lsm01a$model
-
-print(model$formula, showEnv = F)
-cat("R-Squared, Proportion of Variance Explained = ",
-    scales::percent((1 - (summary(model)$deviance/summary(model)$null.deviance)),accuracy = .01)
-)
-cat("MODEL FIT",
-    "\nChi-Square = ", with(model, null.deviance - deviance),
-    "\ndf = ", with(model, df.null - df.residual),
-    "\np-value = ", with(model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
-)
-summary(model) %>% print()
-
-exp(cbind(OR = coef(model), confint(model))) #%>% neat()
-# summary(model)$coefficients %>% neat(output_format = "pandoc") %>% print()
-# https://datascienceplus.com/perform-logistic-regression-in-r/
-anova(model, test="Chisq") %>% print()
-
-
 
 # ---- graph-00 -----------------------------------------------------------------
+# MD vs ARNP vs PA predicts return to care when looking at reason for visit and if they've had a prior no show
+
+g00 <- lsm00$predicted %>%
+  ggplot(aes(x = provider, y = probability, fill = provider))+
+  geom_boxplot(alpha = .3)+
+  geom_jitter(alpha =.3 )+
+  facet_grid(history_noshow ~ reason_for_visit)+
+  theme_bw()
+g00
+
+
 
 g00 <- lsm00$predicted %>%
   # dplyr::filter(!reason_for_visit %in% c("female gyn", "bladder") ) %>%
@@ -758,6 +691,351 @@ g01 <- lsm00$predicted %>%
 g01
 
 #  Does letter make a difference in different insurance plans?
+
+# ---- m01 ------------------------
+outcome <- "letter_sent ~ "
+predictors_01 <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+)
+lsm00 <- ds_modeling %>% run_logistic(predictors_01)
+model <- lsm00$model
+print(model$formula, showEnv = F)
+model %>% get_rsquared()
+model %>% get_model_fit()
+summary(model) %>% print()
+exp(cbind(OR = coef(model), confint(model))) #%>% neat()
+# summary(model)$coefficients %>% neat(output_format = "pandoc") %>% print()
+# https://datascienceplus.com/perform-logistic-regression-in-r/
+anova(model, test="Chisq") %>% print()
+
+# ---- m01a ---------------
+outcome <- "letter_sent ~"
+# modeling the outcome using a single predictor
+
+l <- ds_modeling %>% run_logistic("insurance")
+l$model %>% get_rsquared() # 0.00%
+l$model %>% get_model_fit()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+l <- ds_modeling %>% run_logistic("pm_appointment")
+l$model %>% get_rsquared() # 0.10%
+l$model %>% get_model_fit()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+l <- ds_modeling %>% run_logistic("preferred_language")
+l$model %>% get_rsquared() # 0.02%
+l$model %>% get_model_fit()
+
+l <- ds_modeling %>% run_logistic("male")
+l$model %>% get_rsquared() # 0.01%
+l$model %>% get_model_fit()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+l <- ds_modeling %>% run_logistic("history_noshow")
+l$model %>% get_rsquared() # 0.58%
+l$model %>% get_model_fit()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+l <- ds_modeling %>% run_logistic("month_of_appointment")
+l$model %>% get_rsquared() # 10.53%
+l$model %>% get_model_fit()
+
+l <- ds_modeling %>% run_logistic("provider")
+l$model %>% get_rsquared() # 1.80%
+l$model %>% get_model_fit()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+l <- ds_modeling %>% run_logistic("reason_for_visit")
+l$model %>% get_rsquared() # 1.70%
+l$model %>% get_model_fit()
+
+
+
+# ---- m01b ---------------------
+outcome <- "letter_sent ~"
+# modeling the outcome using a combination of predictors
+
+l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_for_visit"))
+l$model %>% get_rsquared()
+
+
+l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_for_visit"))
+l$model %>% get_rsquared()
+
+l <- ds_modeling %>% run_logistic(c("month_of_appointment","provider","reason_for_visit", "history_noshow"))
+l$model %>% get_rsquared()
+
+
+
+# ---- letter_1 -----------------------
+# insurance
+ds_modeling %>%
+  dplyr::select(letter_sent, insurance) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "Insurance"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~insurance + letter_sent, data = ds_modeling,
+           main = "Patients followed up by Insurance"
+           ,xlab = "Insurance", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("insurance")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+# Insurance does not appear to be related to return (ChiSq = 0,df =1, p = .92)
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"insurance"              # Variance Explained (on its own) = 0.00%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+
+# ---- letter_2 -----------------------
+# pm_appointment
+ds_modeling %>%
+  dplyr::select(letter_sent, pm_appointment) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "PM Appointment"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~pm_appointment + letter_sent, data = ds_modeling,
+           main = "Patients followed up by PM Appointment"
+           ,xlab = "PM Appointment", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("pm_appointment")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- letter_3 -----------------------
+# preferred_language
+ds_modeling %>%
+  dplyr::select(letter_sent, preferred_language) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "Preferred Language"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~preferred_language + letter_sent, data = ds_modeling,
+           main = "Patients followed up by Preferred Language"
+           ,xlab = "Preferred Language", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("preferred_language")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- letter_4 -----------------------
+# male
+ds_modeling %>%
+  dplyr::select(letter_sent, male) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "Gender"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~male + letter_sent, data = ds_modeling,
+           main = "Patients followed up by Gender"
+           ,xlab = "Gender", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("male")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- letter_5 -----------------------
+# history_noshow
+ds_modeling %>%
+  dplyr::select(letter_sent, history_noshow) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "History No-Show"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~history_noshow + letter_sent, data = ds_modeling,
+           main = "Patients followed up by history of No-Shows"
+           ,xlab = "History No-Show", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("history_noshow")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- letter_6 -----------------------
+# month_of_appointment
+ds_modeling %>%
+  dplyr::select(letter_sent, month_of_appointment) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "Month of Appointment"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~month_of_appointment + letter_sent, data = ds_modeling,
+           main = "Patients followed up by Month of Appointment"
+           ,xlab = "Month of Appointment", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("month_of_appointment")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- letter_7 -----------------------
+# provider
+ds_modeling %>%
+  dplyr::select(letter_sent, provider) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "Provider"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~provider + letter_sent, data = ds_modeling,
+           main = "Patients followed up by Provider"
+           ,xlab = "Provider", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("provider")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+# provider is significanlty associated with return
+# those seen by MD are 2.62 times more likely to return than those seen by ARNP
+# those seen by PA are 2.31 times more likely to return than those seen by ARNP
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+# ---- letter_8 -----------------------
+# reason_for_visit
+ds_modeling %>%
+  dplyr::select(letter_sent, reason_for_visit) %>%
+  sjPlot::sjtab(fun = "xtab", var.labels=c("Letter Sent", "Reason for Visit"),
+                show.row.prc=T, show.col.prc=T, show.summary=T, show.exp=T, show.legend=T)
+mosaicplot(~reason_for_visit + letter_sent, data = ds_modeling,
+           main = "Patients followed up by Reason for Visit"
+           ,xlab = "Reason for Visit", y = "Letter Sent"
+           ,shade = TRUE)
+
+outcome <- "letter_sent ~"
+l <- ds_modeling %>% run_logistic("reason_for_visit")
+l$model %>% get_rsquared()
+l$model %>% get_model_fit()
+summary(l$model) %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+outcome <- "letter_sent ~ "
+predictors <- c(
+  "insurance"              # Variance Explained (on its own) = 0.00%
+  ,"pm_appointment"        # Variance Explained (on its own) = 0.10%
+  ,"preferred_language"    # Variance Explained (on its own) = 0.02%
+  ,"male"                  # Variance Explained (on its own) = 0.01%
+  ,"history_noshow"        # Variance Explained (on its own) = 0.58%
+  ,"month_of_appointment"  # Variance Explained (on its own) = 10.53%
+  ,"provider"              # Variance Explained (on its own) = 1.80%
+  ,"reason_for_visit"      # Variance Explained (on its own) = 1.70%
+)
+l <- ds_modeling %>% run_logistic(predictors)
+l$model %>% anova(test="Chisq") %>% print()
+exp(cbind(OR = coef(l$model), confint(l$model)))
+
+
+
+
 
 
 # ---- ---------
@@ -854,62 +1132,6 @@ mosaicplot(~letter_sent + reason_for_visit, data = ds_modeling,
 # dt2 %>% t() %>% gplots::balloonplot( main ="housetasks", xlab ="", ylab="",
 #             label = FALSE, show.margins = FALSE)
 
-
-
-# ---- model-0 -----------------------------------------------------------------
-predictors_0 <- c(
-  "letter_sent"
-  ,"reason_for_visit"
-)
-lsm0 <- ds_modeling %>% run_logistic(predictors_0)
-# AFter controlling for the effect of the Follow up Communication,
-# the effect of the 1Reason for Visit1 still remains significatn (Deviance.Rside= 30.82, df = 5, p < .001)
-
-# ---- graph-0 -----------------------------------------------------------------
-
-lsm0$predicted %>%
-  ggplot(aes(x = letter_sent, y = probability))+
-  geom_bar(stat = "identity")
-
-# ---- model-1 -----------------------------------------------------------------
-
-# model_1 <- stats::glm(
-#   formula = returned_to_care ~  letter_sent + male
-#   ,family = "binomial"
-#   ,data = ds_modeling
-# )
-# summary(model_1)
-# # create levels of predictors for which to generate predicted values
-# ds_predicted_1 <- ds_modeling %>%
-#   dplyr::select(letter_sent, male) %>%
-#   dplyr::distinct()
-# # add model prediction
-# ds_predicted_1 <- ds_predicted_1 %>%
-#   dplyr::mutate(
-#     log_odds     = predict(object = model_1, newdata = .)
-#     ,probability = plogis(log_odds)
-#   )
-
-# ---- graph-1 -----------------------------------------------------------------
-
-# g1 <- ds_predicted_1 %>%
-#   ggplot(aes(x = male, y = probability))+
-#   geom_point(aes(color = letter_sent))
-# g1
-
-
-# ---- model-2 -----------------------------------------------------------------
-
-
-
-# ---- graph-2 -----------------------------------------------------------------
-
-
-# ---- model-3 -----------------------------------------------------------------
-
-
-
-# ---- graph-3 -----------------------------------------------------------------
 
 
 
