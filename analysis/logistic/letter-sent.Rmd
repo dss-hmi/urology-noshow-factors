@@ -34,7 +34,7 @@ opts_chunk$set(
   tidy = FALSE,
   fig.height = 4, 
   fig.width = 5.5, 
-  out.width = "550px",
+  out.width = "900px",
   fig.path = 'figure_rmd/',     
   dev = "png",
   dpi = 400
