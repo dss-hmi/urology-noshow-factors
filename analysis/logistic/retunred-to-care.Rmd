@@ -88,18 +88,6 @@ To better understand the data set, let us inspect quantitative properties of eac
 ```{r drop-small-groups, echo=TRUE, results='show', message=FALSE}
 ```
 
-# Questions 
-
-1. Does sending a letter increase likelihood of return to care?  
-
-2. What factors increase probability of return to care if we exclude predictors that are not significant? The predictors we are the most interested in are: reason for visit, insurance type, provider, and prior no show. 
-
-3. Does provider (MD vs ARNP vs PA) predict return to care when looking at reason for visit and if they've had a prior no show?
-
-4. Does insurance type predict return to care? What if compared with reason for visit as well?
-
-5. What populations do MD vs ARNP vs PA see based on reason for visit ? There is a bias in this - ARNP is more likely to see voiding and PA is more likely to see penile. 
-
 # Model
 
 ```{r model-function, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
