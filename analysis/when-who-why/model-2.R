@@ -59,10 +59,7 @@ ggplot2::theme_set(ggplot2::theme_bw())
 # ---- load-data -------------------------------------------------------------
 ds <- readRDS("./data-unshared/derived/0-greeted.rds")
 # ---- inspect-data -------------------------------------------------------------
-ds %>% glimpse()
-# ds %>% explore::describe_all() %>% neat()
-# number of missing in each column
-sapply(ds, function(x) sum(is.na(x))) # no missing observation
+
 # ---- tweak-data --------------------------------------------------------------
 # Establish reference categories for more straigforward interpretation of parameters
 ds1 <- ds %>%
@@ -106,13 +103,13 @@ ds2 <- ds2 %>% gdata::drop.levels(reorder=FALSE)
 # resulting number of observations
 (remaining_obs <- ds2 %>% count())
 # number of observations removed
-(initial_obs - remaining_obs )
+(initial_obs - remaining_obs )%>% neat()
 # percent of initial observations removed
 ((initial_obs - remaining_obs )/initial_obs) %>% pull() %>% scales::percent()
 
 # ds_modeling <- ds1 # all observation included
 ds_modeling <- ds2 # groups with small n droped
-ds_modeling %>% glimpse(90)
+# ds_modeling %>% glimpse(90)
 
 
 # ---- define-function ------------------------------------------------
@@ -296,6 +293,7 @@ for(item_i in predictors){
     ,color = varnames_varlabels[item_i]
   )
   print(g)
+  cat("\n")
 
 
 }
