@@ -8,7 +8,7 @@ output:
     theme: simplex
     toc: yes
     toc_float: yes
-    code_folding: show
+    code_folding: hide
 ---
 This report discribes the visits to  the pediatric urology clinin, answering the questions WHEN the visit occured (`month_of_appointment`), WHO saw the patient (`provider`), and WHY the patient came (`reason_for_visit`). 
 
@@ -67,26 +67,22 @@ Packages that will be used in this analysis:
 
 <!-- Declare any global functions specific to a Rmd output.  Suppress the output. --> 
 ```{r, echo=echoChunks, message=FALSE}
-#Put code in here.  It doesn't call a chunk in the codebehind file.
 ```
 
-# Data
-
-Import the data prepared by the `./manipulation/0-greeter.R` 
 <!-- Load the datasets.   -->
-```{r load-data, echo=echoChunks, results='show', message=FALSE}
+```{r load-data, echo=F, results='hide', message=FALSE}
 ```
 
 To better understand the data set, let us inspect quantitative properties of each variable
 <!-- Inspect the datasets.   -->
-```{r inspect-data, echo=echoChunks, results='show', message=FALSE}
+```{r inspect-data, echo=F, results='hide', message=FALSE}
 ```
 
 <!-- Tweak the dataset   -->
-```{r tweak-data, echo=TRUE, results='show', message=FALSE}
+```{r tweak-data, echo=F, results='hide', message=FALSE}
 ```
 
-```{r drop-small-groups, echo=FALSE, results='asis', message=FALSE, warning=F}
+```{r drop-small-groups, echo=F, results='hide', message=FALSE, warning=F}
 ```
 
 ```{r define-function, echo=echoChunks, results='show', message=FALSE,warning=F,cache=cacheChunks}
@@ -94,17 +90,14 @@ To better understand the data set, let us inspect quantitative properties of eac
 
 # Provider by Reason
 
+Two of the categories in `reason_for_visit` are poorly populated. We present these data once, but remove `bladder` and `female gyn` in subsequent graphs to improve visibility. 
+
 ```{r with-small-groups, echo=FALSE, results='show', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
 ```
 
 
 ```{r provider-by-reason, echo=FALSE, results='asis', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
 ```
-
-# Drop small groups
-```{r provider-by-reason-drop-small, echo=FALSE, results='asis', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
-```
-
 
 
 
