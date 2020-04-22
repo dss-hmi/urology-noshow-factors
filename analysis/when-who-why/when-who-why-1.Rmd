@@ -1,6 +1,6 @@
 ---
-title: "Letter Sent"
-date: Nov 26, 2019
+title: "When, Who, Why"
+date: Apr 23, 2020
 author: Andriy Koval
 output:
   html_document:
@@ -94,13 +94,17 @@ To better understand the data set, let us inspect quantitative properties of eac
 
 # Provider by Reason
 
-Before we serialize the graphs, we must demostrate why certain groups were dropped from the analysis
-## Drop small groups
-```{r with-small-groups, echo=FALSE, results='asis', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
+```{r with-small-groups, echo=FALSE, results='show', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
 ```
+
 
 ```{r provider-by-reason, echo=FALSE, results='asis', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
 ```
+
+# Drop small groups
+```{r provider-by-reason-drop-small, echo=FALSE, results='asis', message=FALSE, warning=F, fig.width = 12, fig.height = 8, cache = T}
+```
+
 
 
 
