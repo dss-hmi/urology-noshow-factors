@@ -168,12 +168,13 @@ get_model_fit <- function(m){
 # basic_model_insource("./scripts/modeling/model-basic.R")fo()
 # make_result_table()
 make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL, smooth = NULL, y_aes = "n_patients"){
-  d <- ds_modeling
-  x_aes <- "month_of_appointment"
-  fill_aes <- "letter_sent"
-  facet_row <- "provider"
-  facet_col <- "reason_for_visit"
-  #
+  # d <- ds_modeling
+  # x_aes <- "month_of_appointment"
+  # fill_aes <- "letter_sent"
+  # facet_row <- "provider"
+  # facet_col <- "reason_for_visit"
+  # y_aes = "n_patients"
+
   sample_size <- d %>% dplyr::count() %>% dplyr::pull()
 
   d1 <- d %>%
@@ -185,15 +186,35 @@ make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL,
     dplyr::mutate(
       pct_patients = (n_patients / sample_size)*100
     )
+  number_of_hues <- d1 %>% dplyr::distinct(!!ensym(fill_aes)) %>% nrow()
+
+  # g1 <- d1 %>%
+  #   ggplot(aes(x = !!ensym(x_aes), y = !!ensym(y_aes), fill = !!ensym(fill_aes))) +
+  #   geom_col()+
+  #   theme(
+  #     axis.text.x = element_text(angle = 90, vjust = .2)
+  #     ,legend.position = "top"
+  #   )
 
   g1 <- d1 %>%
-    ggplot(aes(x = !!ensym(x_aes), y = !!ensym(y_aes), fill = !!ensym(fill_aes))) +
-    geom_col()+
+    ggplot(
+      aes(
+        x = !!ensym(x_aes)
+        , y = !!ensym(y_aes)
+        , fill = !!ensym(fill_aes)
+        ,group = !!ensym(fill_aes)
+        )
+    ) +
+    geom_col( alpha = .2, color = "black")+
+    geom_point(shape =21, color = "black",size = 2 )+
+    geom_line(aes(color = !!ensym(fill_aes)))+
+    # scale_fill_manual(values  = (RColorBrewer::brewer.pal(number_of_hues,"Dark2")[1:number_of_hues]))
+    # scale_color_manual(values = (RColorBrewer::brewer.pal(number_of_hues,"Dark2")[1:number_of_hues]))
     theme(
       axis.text.x = element_text(angle = 90, vjust = .2)
       ,legend.position = "top"
     )
-
+  # g1
 
   if(!is.null(facet_row) & !is.null(facet_col)){
     facet_expr <- paste0( facet_row, " ~ ", facet_col)
@@ -208,22 +229,22 @@ make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL,
     facet_formula <- enexpr(facet_expr)
     g1 <- g1 +facet_grid(facet_formula)
   }
+  g1
   return(g1)
 }
 # How to use
-ds_modeling %>% make_facet_graph(
-  x_aes     = "month_of_appointment"
-  ,fill_aes  = "letter_sent"
-  ,facet_row =  "provider"
-  ,facet_col =  "reason_for_visit"
-  ,y_aes = "pct_patients"
-  )
+# ds_modeling %>% make_facet_graph(
+#   x_aes     = "month_of_appointment"
+#   ,fill_aes  = "letter_sent"
+#   ,facet_row =  "provider"
+#   ,facet_col =  "reason_for_visit"
+#   )
 
 # ds_modeling %>% make_facet_graph(
-#   x_asix     = "month_of_appointment"
+#   x_aes     = "month_of_appointment"
 #   ,fill_aes  = "letter_sent"
 #   # ,facet_row =  "provider"
-#   ,facet_col =  "reason_for_visit"
+#   # ,facet_col =  "reason_for_visit"
 # )
 
 
@@ -256,12 +277,14 @@ predictors <- c(
 # item_i <- predictors[5]
 
 for(item_i in predictors){
-  cat("\n## ", varnames_varlabels[item_i],"\n" )
-  g <- ds1 %>%
+  d <- ds1 %>%
     dplyr::mutate(
       month_of_appointment = factor(month_of_appointment, levels = month.abb)
     ) %>%
-    dplyr::filter(!reason_for_visit   %in% c("Female gyn","Bladder") ) %>%
+    dplyr::filter(!reason_for_visit   %in% c("Female gyn","Bladder") )
+
+  cat("\n## ", varnames_varlabels[item_i],"\n" )
+  g <- d %>%
     make_facet_graph(
     x_aes     = "month_of_appointment"
     ,fill_aes  = item_i
@@ -270,9 +293,11 @@ for(item_i in predictors){
   )
   g <- g + labs(
     fill = varnames_varlabels[item_i]
+    ,color = varnames_varlabels[item_i]
   )
   print(g)
-  cat("\n")
+
+
 }
 
 
