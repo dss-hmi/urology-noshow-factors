@@ -167,20 +167,24 @@ get_model_fit <- function(m){
 # from source("./scripts/modeling/model-basic.R")
 # basic_model_insource("./scripts/modeling/model-basic.R")fo()
 # make_result_table()
-make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL, smooth = NULL){
-  # d <- ds_modeling
-  # x_aes <- "month_of_appointment"
-  # fill_aes <- "letter_sent"
-  # facet_row <- "provider"
-  # facet_col <- "reason_for_visit"
+make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL, smooth = NULL, y_aes = "n_patients"){
+  d <- ds_modeling
+  x_aes <- "month_of_appointment"
+  fill_aes <- "letter_sent"
+  facet_row <- "provider"
+  facet_col <- "reason_for_visit"
   #
+  sample_size <- d %>% dplyr::count() %>% dplyr::pull()
+
   d1 <- d %>%
     dplyr::group_by(.dots = c(x_aes, fill_aes, facet_row, facet_col)) %>%
     dplyr::summarize(
       n_patients = dplyr::n()
     ) %>%
-    dplyr::ungroup()
-  y_aes <- "n_patients"
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      pct_patients = (n_patients / sample_size)*100
+    )
 
   g1 <- d1 %>%
     ggplot(aes(x = !!ensym(x_aes), y = !!ensym(y_aes), fill = !!ensym(fill_aes))) +
@@ -207,13 +211,14 @@ make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL,
   return(g1)
 }
 # How to use
-# ds_modeling %>% make_facet_graph(
-#   x_asix     = "month_of_appointment"
-#   ,fill_aes  = "letter_sent"
-#   ,facet_row =  "provider"
-#   ,facet_col =  "reason_for_visit"
-#   )
-#
+ds_modeling %>% make_facet_graph(
+  x_aes     = "month_of_appointment"
+  ,fill_aes  = "letter_sent"
+  ,facet_row =  "provider"
+  ,facet_col =  "reason_for_visit"
+  ,y_aes = "pct_patients"
+  )
+
 # ds_modeling %>% make_facet_graph(
 #   x_asix     = "month_of_appointment"
 #   ,fill_aes  = "letter_sent"
@@ -222,13 +227,12 @@ make_facet_graph <- function(d, x_aes, fill_aes, facet_row=NULL, facet_col=NULL,
 # )
 
 
-# ---- with-small-groups- ------------------
+# ---- with-small-groups ------------------
 
 ds1 %>%
   dplyr::mutate(
     month_of_appointment = factor(month_of_appointment, levels = month.abb)
   ) %>%
-  dplyr::filter(!reason_for_visit   %in% c("Female gyn","Bladder") ) %>%
   make_facet_graph(
   x_aes     = "month_of_appointment"
   ,fill_aes  = "letter_sent"
@@ -246,16 +250,18 @@ predictors <- c(
   ,"male"                  # Variance Explained (on its own) = 0.55%
   ,"history_noshow"        # Variance Explained (on its own) = 0.68%
   ,"letter_sent"           # Variance Explained (on its own) = 0.25%
+  ,"returned_to_care"
 )
 
 # item_i <- predictors[5]
 
 for(item_i in predictors){
-  cat("\n## ", item_i,"\n" )
+  cat("\n## ", varnames_varlabels[item_i],"\n" )
   g <- ds1 %>%
     dplyr::mutate(
-      month_of_appoinment = factor(month_of_appoinment, levels = month.abb)
+      month_of_appointment = factor(month_of_appointment, levels = month.abb)
     ) %>%
+    dplyr::filter(!reason_for_visit   %in% c("Female gyn","Bladder") ) %>%
     make_facet_graph(
     x_aes     = "month_of_appointment"
     ,fill_aes  = item_i
@@ -269,22 +275,6 @@ for(item_i in predictors){
   cat("\n")
 }
 
-# ---- provider-by-reason-with-small-groups ------------------
-
-for(item_i in predictors){
-  cat("\n## ", item_i,"\n" )
-  ds_modeling %>% make_facet_graph(
-    x_asix     = "month_of_appointment"
-    ,fill_aes  = item_i
-    ,facet_row =  "provider"
-    ,facet_col =  "reason_for_visit"
-  )+
-    labs(
-      fill = varnames_varlabels[item_i]
-    ) %>%
-    print()
-  cat("\n")
-}
 
 # ---- publish ---------------------------------------
 path_report_1 <- "./analysis/titanic-separate-layers/titanic.Rmd"
