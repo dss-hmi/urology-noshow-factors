@@ -259,6 +259,21 @@ ds1 %>%
 ) %>%
   print()
 
+
+# ----- ---------------
+ds1 %>%
+  dplyr::mutate(
+    month_of_appointment = factor(month_of_appointment, levels = month.abb)
+  ) %>%
+  dplyr::filter(!reason_for_visit   %in% c("Female gyn","Bladder") ) %>%
+  make_facet_graph(
+    x_aes     = "month_of_appointment"
+    ,fill_aes  = "letter_sent"
+    # ,facet_row =  "provider"
+    ,facet_col =  "reason_for_visit"
+  ) %>%
+  print()
+
 # ---- provider-by-reason ------------------
 
 predictors <- c(
