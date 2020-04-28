@@ -26,9 +26,12 @@ library(tidyr) # pivoting
 library(forcats) # factors
 
 # ---- declare-globals ---------------------------------------------------------
-path_input <- "./data-unshared/raw/STATS_Uro.xlsx"
+# path_input <- "./data-unshared/raw/STATS_Uro.xlsx"
+# path_input <- "./data-unshared/raw/STATS_Uro_noduplicates.xlsx"
+path_input <- "./data-unshared/raw/STATS_Uro_noduplicates2.xlsx"
 # ---- load-data ---------------------------------------------------------------
-ds0 <- readxl::read_xlsx(path_input, sheet = "DATA")
+# ds0 <- readxl::read_xlsx(path_input, sheet = "DATA")
+ds0 <- readxl::read_xlsx(path_input, sheet = "Sheet1")
 ds0 %>% glimpse()
 
 # ---- tweak-data ---------------------
@@ -61,6 +64,53 @@ varnames_varlabels <- c(
   ,"letter_sent"          = "Was letter sent?"
 )
 ds %>% glimpse(50)
+
+# ---- duplicate-analysis
+# dupicates without stars
+# Q: are there duplicates among ids NOT marked by a star?
+d <- ds %>%
+  select(patient_id) %>%
+  mutate(
+    has_a_star = grepl("\\d+\\*$", patient_id)
+    # ,without_a_star = gsub("\\*$","", patient_id) # remove star from the id
+  ) %>%
+  filter(!has_a_star) %>%
+  group_by(patient_id) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  filter(n > 1)
+# A: NO, there are no duplicate
+print(d)
+
+# Q: What are the duplicated values?
+d <- ds %>%
+  select(patient_id) %>%
+  arrange(patient_id) %>%
+  mutate(
+    has_a_star = grepl("\\d+\\*$", patient_id)
+  ) %>%
+  filter(has_a_star)
+d %>% DT::datatable(filter = "top")
+# Q: How many ids have at least one dupicate?
+d %>% n_distinct("patient_id")
+# Q: What is the frequency distribution of number of diplicates?
+d %>%
+  group_by(patient_id) %>%
+  summarize(n = n()) %>%
+  ungroup() %>%
+  TabularManifest::histogram_discrete("n")
+
+# remove persons with multiple visits
+
+ds <- ds %>%
+  mutate(
+    marked_by_star = grepl("\\d+\\*$", patient_id)
+  ) %>%
+  filter(!marked_by_star)
+# Q: What is sample size after removing persons with multiple visits?
+ds %>% n_distinct("patient_id")
+
+# ---- factor-levels --------------
 
 # Match factor levels to the labels
 lvl_reason_for_visit <- c(
@@ -134,9 +184,7 @@ ds1 <- ds %>%
     ,letter_sent = (letter_sent == 1)
 
   )
-ds1 %>% glimpse(50)
-
-
+ds1 %>% glimpse()
 
 # ---- define-utility-functions ---------------
 
