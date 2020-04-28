@@ -1679,20 +1679,19 @@ returned_to_care_colors &lt;- c(
 <pre class="r"><code>ds &lt;- readRDS(&quot;./data-unshared/derived/0-greeted.rds&quot;)</code></pre>
 <p>To better understand the data set, let us inspect quantitative properties of each variable <!-- Inspect the datasets.   --></p>
 <pre class="r"><code>ds %&gt;% glimpse()</code></pre>
-<pre><code>Rows: 702
-Columns: 12
-$ patient_id           &lt;chr&gt; &quot;20247576&quot;, &quot;20479667&quot;, &quot;20491072&quot;, &quot;20512670&quot;, &quot;20522383&quot;, &quot;20534993&quot;, &quot;20580645&quot;, &quot;3...
-$ male                 &lt;lgl&gt; TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE...
-$ reason_for_visit     &lt;fct&gt; Bladder, Penile, Testies/Scrotum, Testies/Scrotum, Voiding, Bladder, Voiding, Renal/Ur...
-$ provider             &lt;fct&gt; MD, PA, MD, MD, ARNP, MD, MD, MD, MD, ARNP, ARNP, MD, ARNP, ARNP, ARNP, MD, MD, MD, AR...
-$ insurance            &lt;fct&gt; Private, Medicaid, Medicaid, Medicaid, Private, Medicaid, Medicaid, Medicaid, Medicaid...
-$ history_noshow       &lt;fct&gt; None, Urology only, Urology only, Other, Urology only, Urology only, Urology only, Non...
-$ month_of_appointment &lt;fct&gt; Dec, Jan, Jan, Apr, Jul, Sep, Jun, May, Jul, Mar, May, Jul, Sep, May, Apr, Jun, Dec, J...
-$ pm_appointment       &lt;lgl&gt; FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALS...
+<pre><code>Rows: 738
+Columns: 11
+$ patient_id           &lt;chr&gt; &quot;20247576&quot;, &quot;20479667&quot;, &quot;20491072&quot;, &quot;20512670&quot;, &quot;20518741&quot;, &quot;20522383&quot;, &quot;20534993&quot;, &quot;2...
+$ male                 &lt;lgl&gt; TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE,...
+$ reason_for_visit     &lt;fct&gt; Bladder, Penile, Testies/Scrotum, Testies/Scrotum, Testies/Scrotum, Voiding, Bladder, ...
+$ provider             &lt;fct&gt; MD, PA, MD, MD, MD, ARNP, MD, MD, MD, MD, ARNP, ARNP, MD, ARNP, ARNP, ARNP, MD, MD, MD...
+$ insurance            &lt;fct&gt; Private, Medicaid, Medicaid, Medicaid, Private, Private, Medicaid, Medicaid, Medicaid,...
+$ history_noshow       &lt;fct&gt; None, Urology only, Urology only, Other, Other, Urology only, Urology only, Urology on...
+$ month_of_appointment &lt;fct&gt; Dec, Jan, Jan, Apr, Feb, Jul, Sep, Jun, May, Jul, Mar, May, Jul, Sep, May, Apr, Jun, D...
+$ pm_appointment       &lt;lgl&gt; FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE...
 $ preferred_language   &lt;fct&gt; English, English, English, English, English, English, English, English, English, Engli...
-$ returned_to_care     &lt;lgl&gt; TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE,...
-$ letter_sent          &lt;lgl&gt; FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, ...
-$ marked_by_star       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FA...</code></pre>
+$ returned_to_care     &lt;lgl&gt; TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, ...
+$ letter_sent          &lt;lgl&gt; FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE,...</code></pre>
 <pre class="r"><code># ds %&gt;% explore::describe_all() %&gt;% neat()</code></pre>
 <!-- Tweak the dataset   -->
 <pre class="r"><code># Establish reference categories for more straigforward interpretation of parameters
@@ -1737,7 +1736,7 @@ n
 Voiding
 </td>
 <td style="text-align:right;">
-216
+224
 </td>
 </tr>
 <tr>
@@ -1745,7 +1744,7 @@ Voiding
 Renal/Ureter
 </td>
 <td style="text-align:right;">
-59
+62
 </td>
 </tr>
 <tr>
@@ -1753,7 +1752,7 @@ Renal/Ureter
 Testies/Scrotum
 </td>
 <td style="text-align:right;">
-109
+117
 </td>
 </tr>
 <tr>
@@ -1761,7 +1760,7 @@ Testies/Scrotum
 Penile
 </td>
 <td style="text-align:right;">
-291
+308
 </td>
 </tr>
 <tr>
@@ -1802,7 +1801,7 @@ n
 None
 </td>
 <td style="text-align:right;">
-26
+29
 </td>
 </tr>
 <tr>
@@ -1810,7 +1809,7 @@ None
 Medicaid
 </td>
 <td style="text-align:right;">
-587
+618
 </td>
 </tr>
 <tr>
@@ -1818,7 +1817,7 @@ Medicaid
 Private
 </td>
 <td style="text-align:right;">
-89
+91
 </td>
 </tr>
 </tbody>
@@ -1843,7 +1842,7 @@ n
 None
 </td>
 <td style="text-align:right;">
-436
+460
 </td>
 </tr>
 <tr>
@@ -1851,7 +1850,7 @@ None
 Urology only
 </td>
 <td style="text-align:right;">
-132
+138
 </td>
 </tr>
 <tr>
@@ -1859,7 +1858,7 @@ Urology only
 Other
 </td>
 <td style="text-align:right;">
-129
+135
 </td>
 </tr>
 <tr>
@@ -1892,7 +1891,7 @@ n
 English
 </td>
 <td style="text-align:right;">
-614
+645
 </td>
 </tr>
 <tr>
@@ -1900,7 +1899,7 @@ English
 Spanish
 </td>
 <td style="text-align:right;">
-86
+91
 </td>
 </tr>
 <tr>
@@ -1928,7 +1927,7 @@ n
 <tbody>
 <tr>
 <td style="text-align:right;">
-702
+738
 </td>
 </tr>
 </tbody>
@@ -1956,7 +1955,7 @@ n
 <tbody>
 <tr>
 <td style="text-align:right;">
-646
+679
 </td>
 </tr>
 </tbody>
@@ -1976,7 +1975,7 @@ n
 <tbody>
 <tr>
 <td style="text-align:right;">
-56
+59
 </td>
 </tr>
 </tbody>
@@ -1988,20 +1987,19 @@ n
 <pre class="r"><code># ds_modeling &lt;- ds1 # all observation included
 ds_modeling &lt;- ds2 # groups with small n droped
 ds_modeling %&gt;% glimpse(90)</code></pre>
-<pre><code>Rows: 646
-Columns: 12
-$ patient_id           &lt;chr&gt; &quot;20479667&quot;, &quot;20491072&quot;, &quot;20512670&quot;, &quot;20522383&quot;, &quot;2058064...
-$ male                 &lt;lgl&gt; FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, ...
-$ reason_for_visit     &lt;fct&gt; Penile, Testies/Scrotum, Testies/Scrotum, Voiding, Voidi...
-$ provider             &lt;fct&gt; PA, MD, MD, ARNP, MD, MD, MD, ARNP, ARNP, ARNP, ARNP, AR...
-$ insurance            &lt;fct&gt; Medicaid, Medicaid, Medicaid, Private, Medicaid, Medicai...
-$ history_noshow       &lt;fct&gt; Urology only, Urology only, Other, Urology only, Urology...
-$ month_of_appointment &lt;fct&gt; Jan, Jan, Apr, Jul, Jun, May, Jul, Mar, May, Sep, May, A...
-$ pm_appointment       &lt;fct&gt; TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE,...
+<pre><code>Rows: 679
+Columns: 11
+$ patient_id           &lt;chr&gt; &quot;20479667&quot;, &quot;20491072&quot;, &quot;20512670&quot;, &quot;20518741&quot;, &quot;2052238...
+$ male                 &lt;lgl&gt; FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, ...
+$ reason_for_visit     &lt;fct&gt; Penile, Testies/Scrotum, Testies/Scrotum, Testies/Scrotu...
+$ provider             &lt;fct&gt; PA, MD, MD, MD, ARNP, MD, MD, MD, ARNP, ARNP, ARNP, ARNP...
+$ insurance            &lt;fct&gt; Medicaid, Medicaid, Medicaid, Private, Private, Medicaid...
+$ history_noshow       &lt;fct&gt; Urology only, Urology only, Other, Other, Urology only, ...
+$ month_of_appointment &lt;fct&gt; Jan, Jan, Apr, Feb, Jul, Jun, May, Jul, Mar, May, Sep, M...
+$ pm_appointment       &lt;fct&gt; TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE,...
 $ preferred_language   &lt;fct&gt; English, English, English, English, English, English, En...
-$ returned_to_care     &lt;fct&gt; Returned to care, No show, No show, No show, No show, No...
-$ letter_sent          &lt;fct&gt; No letter sent, No letter sent, Letter sent, No letter s...
-$ marked_by_star       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, ...</code></pre>
+$ returned_to_care     &lt;fct&gt; Returned to care, No show, No show, Returned to care, No...
+$ letter_sent          &lt;fct&gt; No letter sent, No letter sent, Letter sent, No letter s...</code></pre>
 </div>
 <div id="model" class="section level1">
 <h1>Model</h1>

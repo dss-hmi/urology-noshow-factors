@@ -112,7 +112,7 @@ d %>%
 
 ds <- ds %>%
   # select(patient_id) %>%
-  arrange(patient_id) %>%
+  arrange(patient_id, month_of_appointment) %>%
   group_by(patient_id) %>%
   mutate(
     row_number = dplyr::row_number()
