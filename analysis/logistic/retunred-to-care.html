@@ -1678,8 +1678,8 @@ returned_to_care_colors &lt;- c(
 <pre class="r"><code>ds &lt;- readRDS(&quot;./data-unshared/derived/0-greeted.rds&quot;)</code></pre>
 <p>To better understand the data set, let us inspect quantitative properties of each variable <!-- Inspect the datasets.   --></p>
 <pre class="r"><code>ds %&gt;% glimpse()</code></pre>
-<pre><code>Observations: 822
-Variables: 11
+<pre><code>Rows: 702
+Columns: 12
 $ patient_id           &lt;chr&gt; &quot;20247576&quot;, &quot;20479667&quot;, &quot;20491072&quot;, &quot;20512670&quot;, &quot;20522383&quot;, &quot;20534993&quot;, &quot;20580645&quot;, &quot;3...
 $ male                 &lt;lgl&gt; TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, FALSE...
 $ reason_for_visit     &lt;fct&gt; Bladder, Penile, Testies/Scrotum, Testies/Scrotum, Voiding, Bladder, Voiding, Renal/Ur...
@@ -1690,7 +1690,8 @@ $ month_of_appointment &lt;fct&gt; Dec, Jan, Jan, Apr, Jul, Sep, Jun, May, Jul, 
 $ pm_appointment       &lt;lgl&gt; FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, FALS...
 $ preferred_language   &lt;fct&gt; English, English, English, English, English, English, English, English, English, Engli...
 $ returned_to_care     &lt;lgl&gt; TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE,...
-$ letter_sent          &lt;lgl&gt; FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, ...</code></pre>
+$ letter_sent          &lt;lgl&gt; FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, ...
+$ marked_by_star       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FA...</code></pre>
 <pre class="r"><code># ds %&gt;% explore::describe_all() %&gt;% neat()</code></pre>
 <!-- Tweak the dataset   -->
 <pre class="r"><code># Establish reference categories for more straigforward interpretation of parameters
@@ -1735,7 +1736,7 @@ n
 Voiding
 </td>
 <td style="text-align:right;">
-248
+216
 </td>
 </tr>
 <tr>
@@ -1743,7 +1744,7 @@ Voiding
 Renal/Ureter
 </td>
 <td style="text-align:right;">
-66
+59
 </td>
 </tr>
 <tr>
@@ -1751,7 +1752,7 @@ Renal/Ureter
 Testies/Scrotum
 </td>
 <td style="text-align:right;">
-130
+109
 </td>
 </tr>
 <tr>
@@ -1759,7 +1760,7 @@ Testies/Scrotum
 Penile
 </td>
 <td style="text-align:right;">
-349
+291
 </td>
 </tr>
 <tr>
@@ -1767,7 +1768,7 @@ Penile
 Bladder
 </td>
 <td style="text-align:right;">
-23
+21
 </td>
 </tr>
 <tr>
@@ -1800,7 +1801,7 @@ n
 None
 </td>
 <td style="text-align:right;">
-35
+26
 </td>
 </tr>
 <tr>
@@ -1808,7 +1809,7 @@ None
 Medicaid
 </td>
 <td style="text-align:right;">
-688
+587
 </td>
 </tr>
 <tr>
@@ -1816,7 +1817,7 @@ Medicaid
 Private
 </td>
 <td style="text-align:right;">
-99
+89
 </td>
 </tr>
 </tbody>
@@ -1841,7 +1842,7 @@ n
 None
 </td>
 <td style="text-align:right;">
-480
+436
 </td>
 </tr>
 <tr>
@@ -1849,7 +1850,7 @@ None
 Urology only
 </td>
 <td style="text-align:right;">
-182
+132
 </td>
 </tr>
 <tr>
@@ -1857,7 +1858,7 @@ Urology only
 Other
 </td>
 <td style="text-align:right;">
-148
+129
 </td>
 </tr>
 <tr>
@@ -1865,7 +1866,7 @@ Other
 Both
 </td>
 <td style="text-align:right;">
-12
+5
 </td>
 </tr>
 </tbody>
@@ -1890,7 +1891,7 @@ n
 English
 </td>
 <td style="text-align:right;">
-723
+614
 </td>
 </tr>
 <tr>
@@ -1898,7 +1899,7 @@ English
 Spanish
 </td>
 <td style="text-align:right;">
-97
+86
 </td>
 </tr>
 <tr>
@@ -1926,7 +1927,7 @@ n
 <tbody>
 <tr>
 <td style="text-align:right;">
-822
+702
 </td>
 </tr>
 </tbody>
@@ -1954,7 +1955,7 @@ n
 <tbody>
 <tr>
 <td style="text-align:right;">
-748
+646
 </td>
 </tr>
 </tbody>
@@ -1974,7 +1975,7 @@ n
 <tbody>
 <tr>
 <td style="text-align:right;">
-74
+56
 </td>
 </tr>
 </tbody>
@@ -1982,12 +1983,12 @@ n
 </div>
 <pre class="r"><code># percent of initial observations removed
 ((initial_obs - remaining_obs )/initial_obs) %&gt;% pull() %&gt;% scales::percent()</code></pre>
-<pre><code>[1] &quot;9%&quot;</code></pre>
+<pre><code>[1] &quot;8%&quot;</code></pre>
 <pre class="r"><code># ds_modeling &lt;- ds1 # all observation included
 ds_modeling &lt;- ds2 # groups with small n droped
 ds_modeling %&gt;% glimpse(90)</code></pre>
-<pre><code>Observations: 748
-Variables: 11
+<pre><code>Rows: 646
+Columns: 12
 $ patient_id           &lt;chr&gt; &quot;20479667&quot;, &quot;20491072&quot;, &quot;20512670&quot;, &quot;20522383&quot;, &quot;2058064...
 $ male                 &lt;lgl&gt; FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, ...
 $ reason_for_visit     &lt;fct&gt; Penile, Testies/Scrotum, Testies/Scrotum, Voiding, Voidi...
@@ -1998,7 +1999,8 @@ $ month_of_appointment &lt;fct&gt; Jan, Jan, Apr, Jul, Jun, May, Jul, Mar, May, 
 $ pm_appointment       &lt;fct&gt; TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, TRUE,...
 $ preferred_language   &lt;fct&gt; English, English, English, English, English, English, En...
 $ returned_to_care     &lt;fct&gt; Returned to care, No show, No show, No show, No show, No...
-$ letter_sent          &lt;fct&gt; No letter sent, No letter sent, Letter sent, No letter s...</code></pre>
+$ letter_sent          &lt;fct&gt; No letter sent, No letter sent, Letter sent, No letter s...
+$ marked_by_star       &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, ...</code></pre>
 </div>
 <div id="model" class="section level1">
 <h1>Model</h1>
@@ -4013,7 +4015,7 @@ reason_for_visitPenile          1.11345884 0.5422121  2.33677075</code></pre>
 <p><summary>Environment <span class="glyphicon glyphicon-plus-sign"></span></summary></p>
 <pre><code>- Session info -------------------------------------------------------------------------------------------------------
  setting  value                       
- version  R version 3.6.2 (2019-12-12)
+ version  R version 3.6.3 (2020-02-29)
  os       Windows 10 x64              
  system   x86_64, mingw32             
  ui       RTerm                       
@@ -4021,22 +4023,22 @@ reason_for_visitPenile          1.11345884 0.5422121  2.33677075</code></pre>
  collate  English_United States.1252  
  ctype    English_United States.1252  
  tz       America/New_York            
- date     2020-04-21                  
+ date     2020-04-28                  
 
 - Packages -----------------------------------------------------------------------------------------------------------
  package      * version date       lib source        
  assertthat     0.2.1   2019-03-21 [1] CRAN (R 3.6.2)
  backports      1.1.5   2019-10-02 [1] CRAN (R 3.6.1)
- callr          3.4.2   2020-02-12 [1] CRAN (R 3.6.2)
- cli            2.0.1   2020-01-08 [1] CRAN (R 3.6.2)
+ callr          3.4.3   2020-03-28 [1] CRAN (R 3.6.3)
+ cli            2.0.2   2020-02-28 [1] CRAN (R 3.6.3)
  colorspace     1.4-1   2019-03-18 [1] CRAN (R 3.6.1)
  crayon         1.3.4   2017-09-16 [1] CRAN (R 3.6.2)
  desc           1.2.0   2018-05-01 [1] CRAN (R 3.6.2)
- devtools       2.2.2   2020-02-17 [1] CRAN (R 3.6.3)
+ devtools       2.3.0   2020-04-10 [1] CRAN (R 3.6.3)
  dichromat    * 2.0-0   2013-01-24 [1] CRAN (R 3.6.0)
- digest         0.6.24  2020-02-12 [1] CRAN (R 3.6.2)
- dplyr        * 0.8.4   2020-01-31 [1] CRAN (R 3.6.2)
- DT             0.12    2020-02-05 [1] CRAN (R 3.6.2)
+ digest         0.6.25  2020-02-23 [1] CRAN (R 3.6.3)
+ dplyr        * 0.8.5   2020-03-07 [1] CRAN (R 3.6.3)
+ DT             0.13    2020-03-23 [1] CRAN (R 3.6.3)
  ellipsis       0.3.0   2019-09-20 [1] CRAN (R 3.6.2)
  evaluate       0.14    2019-05-28 [1] CRAN (R 3.6.2)
  fansi          0.4.1   2020-01-08 [1] CRAN (R 3.6.2)
@@ -4045,7 +4047,7 @@ reason_for_visitPenile          1.11345884 0.5422121  2.33677075</code></pre>
  ggplot2      * 3.2.1   2019-08-10 [1] CRAN (R 3.6.2)
  ggpubr       * 0.2.5   2020-02-13 [1] CRAN (R 3.6.2)
  ggsignif       0.6.0   2019-08-08 [1] CRAN (R 3.6.2)
- glue           1.3.1   2019-03-12 [1] CRAN (R 3.6.2)
+ glue           1.4.0   2020-04-03 [1] CRAN (R 3.6.3)
  gtable         0.3.0   2019-03-25 [1] CRAN (R 3.6.2)
  gtools         3.8.2   2020-03-31 [1] CRAN (R 3.6.2)
  highr          0.8     2019-03-20 [1] CRAN (R 3.6.2)
@@ -4056,7 +4058,7 @@ reason_for_visitPenile          1.11345884 0.5422121  2.33677075</code></pre>
  kableExtra   * 1.1.0   2019-03-16 [1] CRAN (R 3.6.3)
  knitr        * 1.28    2020-02-06 [1] CRAN (R 3.6.2)
  lazyeval       0.2.2   2019-03-15 [1] CRAN (R 3.6.2)
- lifecycle      0.1.0   2019-08-01 [1] CRAN (R 3.6.2)
+ lifecycle      0.2.0   2020-03-06 [1] CRAN (R 3.6.3)
  magrittr     * 1.5     2014-11-22 [1] CRAN (R 3.6.2)
  memoise        1.1.0   2017-04-21 [1] CRAN (R 3.6.2)
  munsell        0.5.0   2018-06-12 [1] CRAN (R 3.6.2)
@@ -4067,27 +4069,27 @@ reason_for_visitPenile          1.11345884 0.5422121  2.33677075</code></pre>
  prettyunits    1.1.1   2020-01-24 [1] CRAN (R 3.6.2)
  processx       3.4.2   2020-02-09 [1] CRAN (R 3.6.2)
  ps             1.3.2   2020-02-13 [1] CRAN (R 3.6.2)
- purrr          0.3.3   2019-10-18 [1] CRAN (R 3.6.2)
+ purrr          0.3.4   2020-04-17 [1] CRAN (R 3.6.3)
  R6             2.4.1   2019-11-12 [1] CRAN (R 3.6.2)
  RColorBrewer * 1.1-2   2014-12-07 [1] CRAN (R 3.6.0)
- Rcpp           1.0.3   2019-11-08 [1] CRAN (R 3.6.2)
+ Rcpp           1.0.4.6 2020-04-09 [1] CRAN (R 3.6.3)
  readr          1.3.1   2018-12-21 [1] CRAN (R 3.6.2)
  remotes        2.1.1   2020-02-15 [1] CRAN (R 3.6.2)
- rlang          0.4.4   2020-01-28 [1] CRAN (R 3.6.2)
+ rlang          0.4.5   2020-03-01 [1] CRAN (R 3.6.3)
  rmarkdown    * 2.1     2020-01-20 [1] CRAN (R 3.6.2)
  rprojroot      1.3-2   2018-01-03 [1] CRAN (R 3.6.2)
  rstudioapi     0.11    2020-02-07 [1] CRAN (R 3.6.2)
  rvest          0.3.5   2019-11-08 [1] CRAN (R 3.6.2)
  scales         1.1.0   2019-11-18 [1] CRAN (R 3.6.2)
  sessioninfo    1.1.1   2018-11-05 [1] CRAN (R 3.6.2)
- stringi        1.4.5   2020-01-11 [1] CRAN (R 3.6.2)
+ stringi        1.4.6   2020-02-17 [1] CRAN (R 3.6.2)
  stringr        1.4.0   2019-02-10 [1] CRAN (R 3.6.2)
- testthat       2.3.1   2019-12-01 [1] CRAN (R 3.6.2)
- tibble         2.1.3   2019-06-06 [1] CRAN (R 3.6.2)
+ testthat       2.3.2   2020-03-02 [1] CRAN (R 3.6.3)
+ tibble         3.0.1   2020-04-20 [1] CRAN (R 3.6.3)
  tidyselect     1.0.0   2020-01-27 [1] CRAN (R 3.6.2)
- usethis        1.5.1   2019-07-04 [1] CRAN (R 3.6.2)
+ usethis        1.6.0   2020-04-09 [1] CRAN (R 3.6.3)
  utf8           1.1.4   2018-05-24 [1] CRAN (R 3.6.2)
- vctrs          0.2.2   2020-01-24 [1] CRAN (R 3.6.2)
+ vctrs          0.2.4   2020-03-10 [1] CRAN (R 3.6.3)
  viridisLite    0.3.0   2018-02-01 [1] CRAN (R 3.6.2)
  webshot        0.5.2   2019-11-22 [1] CRAN (R 3.6.3)
  withr          2.1.2   2018-03-15 [1] CRAN (R 3.6.2)
@@ -4096,7 +4098,7 @@ reason_for_visitPenile          1.11345884 0.5422121  2.33677075</code></pre>
  yaml           2.2.1   2020-02-01 [1] CRAN (R 3.6.2)
 
 [1] C:/Users/an499583/Documents/R/win-library/3.6
-[2] C:/Program Files/R/R-3.6.2/library</code></pre>
+[2] C:/Users/an499583/Documents/R/R-3.6.3/library</code></pre>
 </details>
 </div>
 
