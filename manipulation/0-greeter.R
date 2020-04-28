@@ -102,13 +102,25 @@ d %>%
 
 # remove persons with multiple visits
 
+# ds <- ds %>%
+#   mutate(
+#     marked_by_star = grepl("\\d+\\*$", patient_id)
+#   ) %>%
+#   filter(!marked_by_star)
+# # Q: What is sample size after removing persons with multiple visits?
+# ds %>% n_distinct("patient_id")
+
 ds <- ds %>%
+  # select(patient_id) %>%
+  arrange(patient_id) %>%
+  group_by(patient_id) %>%
   mutate(
-    marked_by_star = grepl("\\d+\\*$", patient_id)
+    row_number = dplyr::row_number()
   ) %>%
-  filter(!marked_by_star)
-# Q: What is sample size after removing persons with multiple visits?
-ds %>% n_distinct("patient_id")
+  ungroup() %>%
+  filter(row_number == 1) %>%
+  select(-row_number)
+
 
 # ---- factor-levels --------------
 
